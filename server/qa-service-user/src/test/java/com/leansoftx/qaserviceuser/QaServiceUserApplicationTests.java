@@ -1,4 +1,4 @@
-package com.example.qaserviceuser;
+package com.leansoftx.qaserviceuser;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
