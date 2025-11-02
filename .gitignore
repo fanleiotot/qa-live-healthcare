@@ -1,0 +1,34 @@
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+
+# Local development files
+.env
+.env.local
+
+# Log files
+*.log
+
+# Operating system files
+.DS_Store
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Maven target directory
+target/
+
+# Frontend specific
+*.local
+*.tmp
+
+# Backend specific
+*.jar
+*.war
+*.ear
+
+# Lock files
+package-lock.json

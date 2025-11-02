@@ -1,0 +1,11 @@
+{
+  "name": "qa-live-healthcare-bolt-vue-c1joxy7j",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start-all": "concurrently \"npm run dev --prefix web/qa-web\" \"mvn spring-boot:run --file server/qa-service-user/pom.xml\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
