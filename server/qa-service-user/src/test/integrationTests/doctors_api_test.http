@@ -1,0 +1,5 @@
+### 测试 /api/doctors GET 接口
+GET http://localhost:8080/api/doctors
+
+### 可选：添加其他测试请求（如带参数的请求）
+# GET http://localhost:8080/api/doctors?name=John
