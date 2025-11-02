@@ -4,31 +4,7 @@
 
 ## 项目结构
 
-```
-web/qa-web/
-├── .env                  # 环境变量配置文件
-├── .gitignore           # Git 忽略规则
-├── index.html           # 应用入口 HTML 文件
-├── package.json         # 项目依赖和脚本配置
-├── package-lock.json    # 依赖版本锁定文件
-├── tsconfig.json        # TypeScript 全局配置
-├── tsconfig.app.json    # 应用 TypeScript 配置
-├── tsconfig.node.json   # Node 环境 TypeScript 配置
-├── vite.config.ts       # Vite 构建配置
-├── public/              # 公共静态资源
-│   └── ...
-└── src/                 # 源代码目录
-    ├── App.vue          # 主应用布局组件，包含头部、内容区域和底部
-    ├── main.ts          # 应用入口文件，集成 Ant Design Vue 和路由配置
-    ├── style.css        # 全局样式
-    ├── vite-env.d.ts    # TypeScript 环境声明
-    ├── assets/          # 静态资源（图片、字体等）
-    ├── components/      # 可复用的公共组件
-    ├── data/            # 模拟数据或数据配置文件
-    ├── router/          # 路由配置
-    ├── store/           # 状态管理（如 Vuex/Pinia）
-    └── views/           # 页面组件
-```
+详细的项目结构说明请参考 [项目结构文档](./docs/project-structure.md)。
 
 ## 开发指南
 
