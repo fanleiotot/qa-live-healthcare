@@ -157,7 +157,7 @@ const navigateTo = (path: string) => {
   font-size: 18px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .desktop-menu {
     display: none;
   }
