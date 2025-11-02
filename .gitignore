@@ -1,0 +1,25 @@
+# Dependency directories
+node_modules/
+
+# Build files
+dist/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Package files
+package-lock.json
