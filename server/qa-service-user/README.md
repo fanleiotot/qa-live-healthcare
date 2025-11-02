@@ -25,10 +25,10 @@ QA Service User 是一个后端服务。
    ```
 
 ## 监控端点
-- `/health`: 应用健康状态
-- `/info`: 应用信息（名称、版本等）
-- `/metrics`: 性能指标
-- `/env`: 环境变量
+- `/actuator/health`: 应用健康状态
+- `/actuator/info`: 应用信息（名称、版本等）
+- `/actuator/metrics`: 性能指标
+- `/actuator/env`: 环境变量
 
 ## 注意事项
 - 默认端口：`8080`

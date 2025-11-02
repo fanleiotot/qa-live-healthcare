@@ -14,16 +14,10 @@ import java.util.stream.Collectors;
 @Service
 public class DoctorUserService {
 
-    private List<Doctor> doctors;
-
-    public DoctorUserService() {
-        loadDoctorsFromJson();
-    }
-
-    private void loadDoctorsFromJson() {
+    private List<Doctor> loadDoctorsFromJson() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            doctors = objectMapper.readValue(
+            return objectMapper.readValue(
                     new ClassPathResource("data/doctor-user-list.json").getFile(),
                     new TypeReference<List<Doctor>>() {}
             );
@@ -33,28 +27,30 @@ public class DoctorUserService {
     }
 
     public List<Doctor> getAllDoctors() {
-        return doctors;
+        return loadDoctorsFromJson();
     }
 
     public Doctor getDoctorById(String id) {
-        return doctors.stream()
+        return loadDoctorsFromJson().stream()
                 .filter(doctor -> doctor.getId().equals(id))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
 
     public List<Doctor> getActiveDoctors() {
-        return doctors.stream()
+        return loadDoctorsFromJson().stream()
                 .filter(Doctor::isActive)
                 .collect(Collectors.toList());
     }
 
     public Doctor addDoctor(Doctor doctor) {
+        List<Doctor> doctors = loadDoctorsFromJson();
         doctors.add(doctor);
         return doctor;
     }
 
     public Doctor updateDoctor(String id, Doctor updatedDoctor) {
+        List<Doctor> doctors = loadDoctorsFromJson();
         Optional<Doctor> existingDoctor = doctors.stream()
                 .filter(doctor -> doctor.getId().equals(id))
                 .findFirst();
@@ -76,6 +72,7 @@ public class DoctorUserService {
     }
 
     public void deleteDoctor(String id) {
+        List<Doctor> doctors = loadDoctorsFromJson();
         doctors.removeIf(doctor -> doctor.getId().equals(id));
     }
 }

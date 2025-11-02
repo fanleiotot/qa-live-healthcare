@@ -48,13 +48,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
+import { fetchAllDoctors } from '@/api/doctorUser';
+
+const allDoctors = ref<Doctor[]>([]);
+const loading = ref(false);
+const error = ref<string | null>(null);
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const doctors = await fetchAllDoctors();
+    console.log('API返回数据:', doctors);
+    allDoctors.value = doctors;
+  } catch (err) {
+    error.value = '获取医生数据失败，请稍后重试。';
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+});
 import { useRouter } from 'vue-router';
-import { store, Doctor } from '../store';
+import { Doctor } from '../store';
 
 const router = useRouter();
-
-const allDoctors = computed(() => store.state.doctors);
 
 const goToConsultation = (doctor: Doctor) => {
   router.push(`/consultation/${doctor.username}`);
