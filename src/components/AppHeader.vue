@@ -5,7 +5,42 @@
         <img src="https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=100" alt="QA Live Healthcare" />
         <span>QA Live Healthcare</span>
       </div>
-      <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu">
+      <div class="menu-container">
+        <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu desktop-menu">
+          <a-menu-item key="home" @click="navigateTo('/')">
+            <HomeOutlined />
+            首页
+          </a-menu-item>
+          <a-menu-item key="consultation" @click="navigateTo('/consultation')">
+            <MessageOutlined />
+            问诊
+          </a-menu-item>
+          <a-menu-item key="doctors" @click="navigateTo('/doctors')">
+            <TeamOutlined />
+            医生
+          </a-menu-item>
+          <a-menu-item key="about" @click="navigateTo('/about')">
+            <InfoCircleOutlined />
+            关于
+          </a-menu-item>
+        </a-menu>
+        <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
+          <UserOutlined />
+          医生登录
+        </a-button>
+      </div>
+      <a-button class="hamburger-btn" @click="toggleMenu">
+        <MenuOutlined />
+      </a-button>
+    </div>
+    <a-drawer
+      placement="right"
+      :closable="false"
+      :visible="drawerVisible"
+      @close="toggleMenu"
+      width="200"
+    >
+      <a-menu v-model:selectedKeys="selectedKeys" mode="vertical" class="mobile-menu">
         <a-menu-item key="home" @click="navigateTo('/')">
           <HomeOutlined />
           首页
@@ -22,23 +57,28 @@
           <InfoCircleOutlined />
           关于
         </a-menu-item>
+        <a-menu-item key="login" @click="navigateTo('/doctor/login')">
+          <UserOutlined />
+          医生登录
+        </a-menu-item>
       </a-menu>
-      <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
-        <UserOutlined />
-        医生登录
-      </a-button>
-    </div>
+    </a-drawer>
   </a-layout-header>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { HomeOutlined, MessageOutlined, TeamOutlined, InfoCircleOutlined, UserOutlined } from '@ant-design/icons-vue';
+import { HomeOutlined, MessageOutlined, TeamOutlined, InfoCircleOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
 const selectedKeys = ref<string[]>(['home']);
+const drawerVisible = ref<boolean>(false);
+
+const toggleMenu = () => {
+  drawerVisible.value = !drawerVisible.value;
+};
 
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {
@@ -54,10 +94,86 @@ watch(() => route.path, (newPath) => {
 
 const navigateTo = (path: string) => {
   router.push(path);
+  drawerVisible.value = false;
 };
 </script>
 
 <style scoped>
+.header {
+  background: #fff;
+  padding: 0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.menu-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+.nav-menu {
+  border-bottom: none;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+
+.desktop-menu {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+.login-btn {
+  margin-left: 20px;
+}
+
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .desktop-menu {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+
+  .login-btn {
+    display: none;
+  }
+}
 .header {
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
