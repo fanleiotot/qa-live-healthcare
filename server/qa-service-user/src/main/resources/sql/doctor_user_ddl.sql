@@ -1,0 +1,15 @@
+-- DoctorUser 表结构定义
+CREATE TABLE IF NOT EXISTS doctor_user (
+    id VARCHAR(36) PRIMARY KEY COMMENT '医生ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+    password VARCHAR(100) NOT NULL COMMENT '密码',
+    name VARCHAR(50) NOT NULL COMMENT '姓名',
+    title VARCHAR(50) COMMENT '职称',
+    department VARCHAR(50) COMMENT '科室',
+    avatar VARCHAR(255) COMMENT '头像URL',
+    experience VARCHAR(100) COMMENT '临床经验',
+    specialties JSON COMMENT '专长领域',
+    is_active BOOLEAN DEFAULT TRUE COMMENT '是否活跃',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='医生用户表';

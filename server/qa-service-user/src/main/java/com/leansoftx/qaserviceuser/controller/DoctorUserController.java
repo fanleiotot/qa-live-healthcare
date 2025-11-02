@@ -1,10 +1,12 @@
 package com.leansoftx.qaserviceuser.controller;
 
-import com.leansoftx.qaserviceuser.model.Doctor;
+import com.leansoftx.qaserviceuser.model.DoctorUser;
 import com.leansoftx.qaserviceuser.service.DoctorUserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/doctors")
@@ -17,28 +19,25 @@ public class DoctorUserController {
     }
 
     @GetMapping
-    public List<Doctor> getAllDoctors() {
+    public List<DoctorUser> getAllDoctors() {
         return doctorUserService.getAllDoctors();
     }
 
     @GetMapping("/{id}")
-    public Doctor getDoctorById(@PathVariable String id) {
-        return doctorUserService.getDoctorById(id);
-    }
-
-    @GetMapping("/active")
-    public List<Doctor> getActiveDoctors() {
-        return doctorUserService.getActiveDoctors();
+    public ResponseEntity<DoctorUser> getDoctorById(@PathVariable String id) {
+        Optional<DoctorUser> doctorUser = doctorUserService.getDoctorById(id);
+        return doctorUser.map(ResponseEntity::ok)
+                        .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Doctor addDoctor(@RequestBody Doctor doctor) {
-        return doctorUserService.addDoctor(doctor);
+    public DoctorUser saveDoctor(@RequestBody DoctorUser doctorUser) {
+        return doctorUserService.saveDoctor(doctorUser);
     }
 
     @PutMapping("/{id}")
-    public Doctor updateDoctor(@PathVariable String id, @RequestBody Doctor doctor) {
-        return doctorUserService.updateDoctor(id, doctor);
+    public DoctorUser updateDoctor(@PathVariable String id, @RequestBody DoctorUser doctorUser) {
+        return doctorUserService.updateDoctor(id, doctorUser);
     }
 
     @DeleteMapping("/{id}")

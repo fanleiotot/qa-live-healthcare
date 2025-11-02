@@ -60,7 +60,17 @@ onMounted(async () => {
   try {
     const doctors = await fetchAllDoctors();
     console.log('API返回数据:', doctors);
-    allDoctors.value = doctors;
+    
+    // 处理数据字段映射和格式转换
+    allDoctors.value = doctors.map(doctor => ({
+      ...doctor,
+      specialties: typeof doctor.specialties === 'string' 
+        ? JSON.parse(doctor.specialties) 
+        : doctor.specialties,
+      isActive: doctor.active // 将 active 字段映射为 isActive
+    }));
+    
+    console.log('处理后的数据:', allDoctors.value);
   } catch (err) {
     error.value = '获取医生数据失败，请稍后重试。';
     console.error(err);
