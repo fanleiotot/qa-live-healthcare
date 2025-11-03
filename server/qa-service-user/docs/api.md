@@ -12,6 +12,28 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 
 ## API 端点列表
 
+### DoctorUserController
+
+**文件位置：** [../src/main/java/com/leansofx/qaserviceuser/controller/DoctorUserController.java](../src/main/java/com/leansofx/qaserviceuser/controller/DoctorUserController.java)
+
+医生用户管理控制器，处理医生用户的CRUD操作、登录认证和相关查询功能。
+
+| 方法 | 端点 | 描述 | 参数 | 请求体 | 响应 |
+|--------|----------|-------------|------------|--------------|----------|
+| GET | `/api/doctors` | 获取所有医生用户 | 无 | 无 | List<DoctorUserResponse> |
+| GET | `/api/doctors/active` | 获取所有激活的医生用户 | 无 | 无 | List<DoctorUserResponse> |
+| GET | `/api/doctors/{id}` | 根据ID获取医生用户 | id: 用户ID | 无 | DoctorUserResponse |
+| GET | `/api/doctors/username/{username}` | 根据用户名获取医生用户 | username: 用户名 | 无 | DoctorUserResponse |
+| GET | `/api/doctors/department/{department}` | 根据科室获取医生用户 | department: 科室名称 | 无 | List<DoctorUserResponse> |
+| GET | `/api/doctors/search` | 搜索医生用户 | keyword: 搜索关键词 | 无 | List<DoctorUserResponse> |
+| GET | `/api/doctors/departments` | 获取所有科室列表 | 无 | 无 | List<String> |
+| GET | `/api/doctors/stats/active-count` | 统计激活的医生用户数量 | 无 | 无 | Map<String, Long> |
+| GET | `/api/doctors/exists/{username}` | 检查用户名是否存在 | username: 用户名 | 无 | Map<String, Boolean> |
+| POST | `/api/doctors` | 创建医生用户 | 无 | DoctorUserCreateRequest | DoctorUserResponse |
+| POST | `/api/doctors/login` | 医生用户登录 | 无 | DoctorUserLoginRequest | DoctorUserLoginResponse |
+| PUT | `/api/doctors/{id}` | 更新医生用户信息 | id: 用户ID | DoctorUserUpdateRequest | DoctorUserResponse |
+| DELETE | `/api/doctors/{id}` | 删除医生用户 | id: 用户ID | 无 | 无内容 |
+
 ### TestController
 
 **文件位置：** [../src/main/java/com/leansofx/qaserviceuser/controller/TestController.java](../src/main/java/com/leansofx/qaserviceuser/controller/TestController.java)
@@ -25,6 +47,77 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 | OPTIONS | `/api/test/cors` | 处理 CORS 预检请求 | 无 | 无 | 无内容 |
 
 #### 数据结构示例
+
+**DoctorUserResponse（医生用户响应）**
+```json
+{
+  "id": "doc001",
+  "username": "dr-zhang-wei",
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true,
+  "createdAt": "2025-11-03 10:15:30",
+  "updatedAt": "2025-11-03 10:15:30"
+}
+```
+
+**DoctorUserCreateRequest（医生用户创建请求）**
+```json
+{
+  "id": "doc001",
+  "username": "dr-zhang-wei",
+  "password": "123456",
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true
+}
+```
+
+**DoctorUserUpdateRequest（医生用户更新请求）**
+```json
+{
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true
+}
+```
+
+**DoctorUserLoginRequest（医生用户登录请求）**
+```json
+{
+  "username": "dr-zhang-wei",
+  "password": "123456"
+}
+```
+
+**DoctorUserLoginResponse（医生用户登录响应）**
+```json
+{
+  "token": "550e8400-e29b-41d4-a716-446655440000_dr-zhang-wei_1699000000000",
+  "id": "doc001",
+  "username": "dr-zhang-wei",
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true,
+  "loginTime": "2025-11-03 10:15:30"
+}
+```
 
 **TestResponse（测试响应）**
 ```json
@@ -139,6 +232,76 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 
 ## 使用示例
 
+### 医生用户管理
+
+**获取所有医生用户：**
+```bash
+curl -X GET http://localhost:8080/api/doctors
+```
+
+**获取激活的医生用户：**
+```bash
+curl -X GET http://localhost:8080/api/doctors/active
+```
+
+**创建医生用户：**
+```bash
+curl -X POST http://localhost:8080/api/doctors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "doc001",
+    "username": "dr-zhang-wei",
+    "password": "123456",
+    "name": "张伟医生",
+    "title": "主任医师",
+    "department": "心内科",
+    "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+    "experience": "15年临床经验",
+    "specialties": ["高血压", "冠心病", "心律失常"],
+    "isActive": true
+  }'
+```
+
+**医生用户登录：**
+```bash
+curl -X POST http://localhost:8080/api/doctors/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "dr-zhang-wei",
+    "password": "123456"
+  }'
+```
+
+**搜索医生用户：**
+```bash
+curl -X GET "http://localhost:8080/api/doctors/search?keyword=张伟"
+```
+
+**根据科室查找医生用户：**
+```bash
+curl -X GET http://localhost:8080/api/doctors/department/心内科
+```
+
+**更新医生用户信息：**
+```bash
+curl -X PUT http://localhost:8080/api/doctors/doc001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "张伟医生",
+    "title": "主任医师",
+    "department": "心内科",
+    "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg",
+    "experience": "15年临床经验",
+    "specialties": ["高血压", "冠心病", "心律失常"],
+    "isActive": true
+  }'
+```
+
+**删除医生用户：**
+```bash
+curl -X DELETE http://localhost:8080/api/doctors/doc001
+```
+
 ### 测试 CORS 配置
 
 **GET 请求示例：**
@@ -160,11 +323,14 @@ curl -X GET http://localhost:8080/actuator/health
 
 ## 注意事项
 
-1. 当前项目处于开发阶段，仅包含测试端点
+1. 当前项目包含完整的医生用户管理功能
 2. 所有 API 端点都支持 CORS
 3. Actuator 端点提供了丰富的监控和管理功能
 4. 建议在生产环境中限制 CORS 配置和 Actuator 端点的访问权限
+5. 登录token目前是简化实现，生产环境建议使用JWT等更安全的方案
+6. 密码存储目前是明文，生产环境应该使用加密存储
 
 ## 版本历史
 
+- **v0.0.2-SNAPSHOT**：新增医生用户管理功能，包含完整的CRUD操作、登录认证、搜索查询等功能
 - **v0.0.1-SNAPSHOT**：初始版本，包含基础的 CORS 测试功能和 Actuator 监控
