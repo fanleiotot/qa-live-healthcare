@@ -171,3 +171,108 @@ curl http://localhost:8080/api/test/cors
 ```bash
 java -jar target/qa-service-user-0.0.1-SNAPSHOT.jar
 ```
+
+## 应用管理脚本
+
+本项目提供了完整的应用管理脚本，用于在生产环境中管理Spring Boot应用的后台运行。
+
+### 脚本列表
+
+| 脚本名称 | 功能描述 |
+|---------|---------|
+| `start.sh` | 启动应用（后台运行） |
+| `stop.sh` | 停止应用 |
+| `restart.sh` | 重启应用 |
+| `status.sh` | 查看应用状态和日志 |
+
+### 使用方法
+
+#### 启动应用
+```bash
+./start.sh
+```
+功能：
+- 检查应用是否已运行，避免重复启动
+- 自动构建JAR文件（如果不存在）
+- 使用nohup在后台运行应用
+- 保存进程ID到`qa-service-user.pid`文件
+- 输出日志到`logs/qa-service-user.log`
+
+#### 停止应用
+```bash
+./stop.sh
+```
+功能：
+- 读取PID文件并优雅停止进程
+- 必要时强制终止进程
+- 清理PID文件
+
+#### 重启应用
+```bash
+./restart.sh
+```
+功能：
+- 组合停止和启动操作
+- 确保应用完全重启
+
+#### 查看应用状态
+```bash
+./status.sh
+```
+显示信息：
+- 应用运行状态和PID
+- 启动时间和内存使用情况
+- 监听端口信息
+- JAR文件信息（大小、修改时间）
+- 日志文件信息和最后10行日志内容
+
+### 生产环境部署
+
+#### 后台运行
+```bash
+# 启动应用
+./start.sh
+
+# 查看状态
+./status.sh
+
+# 查看实时日志
+tail -f logs/qa-service-user.log
+```
+
+#### 应用监控
+```bash
+# 检查健康状态
+curl http://localhost:8080/actuator/health
+
+# 查看应用信息
+curl http://localhost:8080/actuator/info
+```
+
+#### 日志管理
+```bash
+# 查看完整日志
+cat logs/qa-service-user.log
+
+# 实时监控日志
+tail -f logs/qa-service-user.log
+
+# 搜索错误日志
+grep -i error logs/qa-service-user.log
+```
+
+### 文件说明
+
+| 文件/目录 | 说明 |
+|----------|------|
+| `qa-service-user.pid` | 存储应用进程ID |
+| `logs/qa-service-user.log` | 应用日志文件 |
+| `target/qa-service-user-0.0.1-SNAPSHOT.jar` | 应用JAR文件 |
+
+### 注意事项
+
+1. 确保脚本有执行权限（已设置）
+2. 首次运行会自动构建JAR文件
+3. 日志文件会自动创建在logs目录下
+4. 如果异常终止，可以手动删除pid文件后重新启动
+5. 生产环境建议配置日志轮转，避免日志文件过大
