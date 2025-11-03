@@ -121,6 +121,177 @@ npm run preview
 ```
 本地预览生产构建版本
 
+## 应用管理工具
+
+本项目提供了完整的应用管理脚本，用于在开发环境中管理Vue.js应用的后台运行。
+
+### 管理脚本
+
+项目提供了 `app-management.sh` 脚本，支持以下命令：
+
+| 命令 | npm脚本 | 功能描述 |
+|------|---------|---------|
+| `start` | `npm run start` | 启动应用（后台运行） |
+| `stop` | `npm run stop` | 停止应用 |
+| `restart` | `npm run restart` | 重启应用 |
+| `status` | `npm run status` | 查看应用状态 |
+| `logs` | `npm run logs` | 查看应用日志 |
+
+### 使用方法
+
+#### 使用npm脚本（推荐）
+```bash
+# 启动应用
+npm run start
+
+# 查看状态
+npm run status
+
+# 查看日志
+npm run logs
+
+# 停止应用
+npm run stop
+
+# 重启应用
+npm run restart
+```
+
+#### 直接使用脚本
+```bash
+# 给脚本添加执行权限（首次使用）
+chmod +x app-management.sh
+
+# 启动应用
+./app-management.sh start
+
+# 查看状态
+./app-management.sh status
+
+# 查看日志
+./app-management.sh logs
+
+# 停止应用
+./app-management.sh stop
+
+# 重启应用
+./app-management.sh restart
+
+# 查看帮助
+./app-management.sh help
+```
+
+### 功能特性
+
+#### 智能启动
+- 自动检查端口占用情况
+- **端口被占用时自动清理相关进程**
+- 检测应用是否已在运行
+- 等待应用完全启动并显示访问地址
+- 启动失败时提供详细的错误信息
+
+#### 安全停止
+- 优雅终止进程
+- 自动清理PID文件
+- 必要时强制终止顽固进程
+- 等待确认进程完全结束
+
+#### 状态监控
+- 显示应用运行状态和PID
+- 显示内存使用情况
+- 显示监听端口和访问地址
+- 显示日志文件信息
+- 显示最近10行日志内容
+
+#### 日志管理
+- 自动创建日志目录
+- 保存完整应用日志
+- 支持查看最近日志
+- 提供实时监控命令提示
+
+### 文件结构
+
+| 文件/目录 | 说明 |
+|----------|------|
+| `app-management.sh` | 主管理脚本 |
+| `qa-web.pid` | 存储应用进程ID |
+| `logs/qa-web.log` | 应用日志文件 |
+
+### 注意事项
+
+1. 首次使用需要给脚本添加执行权限
+2. 脚本会自动创建必要的日志目录
+3. 如果端口被占用，应用会自动尝试其他端口
+4. 生产环境建议使用专门的进程管理工具（如PM2）
+5. 日志文件会持续增长，建议定期清理或配置日志轮转
+
+### 故障排除
+
+#### VSCode Remote 连接问题
+如果在使用 VSCode Remote 时遇到连接中断问题，这是因为端口清理功能可能误杀了 VSCode 的端口转发进程。
+
+**原因分析:**
+- VSCode Remote 使用 SSH 隧道和端口转发进行连接
+- 端口清理功能会查找并终止占用指定端口的进程
+- 可能误将 VSCode 的端口转发进程识别为需要清理的进程
+
+**解决方案:**
+```bash
+# 方法1: 使用交互模式（默认）
+./app-management.sh start  # 会询问是否清理端口
+
+# 方法2: 禁用自动端口清理
+AUTO_CLEANUP=false ./app-management.sh start
+
+# 方法3: 启用自动清理（适合CI/自动化环境）
+AUTO_CLEANUP=true ./app-management.sh start
+
+# 方法4: 让 Vite 自动寻找其他端口
+# 直接跳过端口清理步骤，Vite会自动使用其他可用端口
+```
+
+#### 端口占用问题
+```bash
+# 脚本会自动检测并清理端口5173的占用（安全模式）
+# 如果需要手动检查端口占用
+lsof -i :5173
+
+# 查看占用端口的进程详情（安全方式）
+lsof -Pan -iTCP -sTCP:LISTEN | grep 5173
+
+# 手动清理端口（仅开发服务器进程）
+# 先确认进程类型，避免误杀系统进程
+ps aux | grep -E "(node.*vite|npm.*dev)" | grep -v grep
+```
+
+#### 应用无法启动
+```bash
+# 检查端口占用
+lsof -i :5173
+
+# 查看详细日志
+npm run logs
+
+# 手动清理PID文件
+rm -f qa-web.pid
+```
+
+#### 进程无法停止
+```bash
+# 查找并手动终止进程
+ps aux | grep vite
+kill -9 <PID>
+
+# 清理PID文件
+rm -f qa-web.pid
+```
+
+#### 权限问题
+```bash
+# 给脚本添加执行权限
+chmod +x app-management.sh
+```
+
 ## 路由结构
 
 | 路径 | 组件 | 描述 |
