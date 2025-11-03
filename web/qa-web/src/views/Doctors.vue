@@ -6,7 +6,13 @@
     </div>
 
     <div class="doctors-container">
-      <div class="doctors-grid">
+      <div v-if="loading" class="loading-container">
+        <a-spin size="large" tip="正在加载医生列表..." />
+      </div>
+      <div v-else-if="allDoctors.length === 0" class="empty-container">
+        <a-empty description="暂无医生信息" />
+      </div>
+      <div v-else class="doctors-grid">
         <a-card
           v-for="doctor in allDoctors"
           :key="doctor.id"
@@ -48,17 +54,36 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { store, Doctor } from '../store';
+import { doctorsApi, DoctorUserResponse } from '../api';
+import { message } from 'ant-design-vue';
 
 const router = useRouter();
 
-const allDoctors = computed(() => store.state.doctors);
+const allDoctors = ref<DoctorUserResponse[]>([]);
+const loading = ref(false);
 
-const goToConsultation = (doctor: Doctor) => {
+const fetchDoctors = async () => {
+  loading.value = true;
+  try {
+    const response = await doctorsApi.getAllDoctors();
+    allDoctors.value = response;
+  } catch (error) {
+    console.error('获取医生列表失败:', error);
+    message.error('获取医生列表失败，请稍后重试');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const goToConsultation = (doctor: DoctorUserResponse) => {
   router.push(`/consultation/${doctor.username}`);
 };
+
+onMounted(() => {
+  fetchDoctors();
+});
 </script>
 
 <style scoped>
@@ -86,6 +111,15 @@ const goToConsultation = (doctor: Doctor) => {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
+}
+
+.loading-container,
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 48px 24px;
 }
 
 .doctors-container {
