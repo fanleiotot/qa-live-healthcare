@@ -1,12 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
-// API 响应包装类型
-interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  success?: boolean;
-}
-
 // 创建 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: '/api', // 使用相对路径，通过 Vite proxy 转发到后端
@@ -34,10 +27,9 @@ service.interceptors.request.use(
 
 // 响应拦截器
 service.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    const { data } = response;
+  (response: AxiosResponse) => {
     // 这里可以根据后端返回的数据结构进行统一处理
-    return data;
+    return response.data;
   },
   (error) => {
     console.error('Response error:', error);
