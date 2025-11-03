@@ -36,9 +36,13 @@ qa-service-user/
     │   └── resources/                      # 资源文件目录
     │       └── application.properties      # Spring Boot 应用配置文件
     └── test/                               # 测试代码
-        └── java/                           # Java 测试代码
-            └── com/leansofx/qaserviceuser/
-                └── QaServiceUserApplicationTests.java  # Spring Boot 应用测试类
+        ├── java/                           # Java 测试代码
+        │   └── com/leansofx/qaserviceuser/
+        │       ├── QaServiceUserApplicationTests.java  # Spring Boot 应用测试类
+        │       └── config/                   # 配置测试目录
+        │           └── DatabaseConnectionTest.java   # 数据库连接测试
+        └── resources/                      # 测试资源文件
+            └── application-test.properties # 测试环境配置文件
 ```
 
 ## 项目文档
@@ -59,6 +63,9 @@ qa-service-user/
 - **spring-boot-starter-web**: Web 应用开发，提供 RESTful API 支持
 - **spring-boot-starter-actuator**: 应用监控和管理端点
 - **spring-boot-starter-test**: 测试框架支持 (JUnit 5)
+- **spring-boot-starter-data-jpa**: Spring Data JPA 支持
+- **mysql-connector-j**: MySQL 数据库驱动
+- **h2**: H2 内存数据库（测试用）
 
 ### 构建工具
 - **Maven**: 使用 Maven Wrapper 进行项目构建
@@ -94,12 +101,26 @@ mvn spring-boot:run
 - `POST /api/test/cors` - CORS POST 请求测试接口
 - `OPTIONS /api/test/cors` - CORS 预检请求处理
 
+### 数据库配置
+- **数据库类型**: MySQL 8.0
+- **连接URL**: `jdbc:mysql://localhost:3306/healthcare`
+- **用户名**: root
+- **密码**: root
+- **JPA配置**: 
+  - `spring.jpa.hibernate.ddl-auto=update`
+  - `spring.jpa.show-sql=true`
+  - `spring.jpa.properties.hibernate.format_sql=true`
+
 ## 测试和监控信息
 
 ### 单元测试
 - **测试框架**: JUnit 5 (通过 spring-boot-starter-test)
-- **测试类**: `QaServiceUserApplicationTests.java`
-- **测试内容**: Spring Boot 应用上下文加载测试
+- **测试类**: 
+  - `QaServiceUserApplicationTests.java` - Spring Boot 应用上下文加载测试
+  - `DatabaseConnectionTest.java` - 数据库连接测试
+- **测试内容**: 
+  - Spring Boot 应用上下文加载
+  - 数据库连接验证
 
 ### 运行测试
 ```bash
@@ -134,7 +155,7 @@ mvn test
 - **开发团队**: QA Healthcare Team
 - **环境**: development
 - **构建时间**: 2025-11-03
-- **功能特性**: CORS, Actuator, Health Checks, User Management
+- **功能特性**: CORS, Actuator, Health Checks, User Management, JPA, MySQL
 
 ### 健康检查
 应用启动后，可通过以下方式检查服务状态：
