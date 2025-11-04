@@ -36,5 +36,8 @@
     "microservice"
   ],
   "author": "QA Healthcare Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "vue-i18n": "^9.14.5"
+  }
 }

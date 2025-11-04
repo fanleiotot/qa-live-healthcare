@@ -9,21 +9,29 @@
         <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu">
           <a-menu-item key="home" @click="navigateTo('/')">
             <HomeOutlined />
-            首页
+            {{ t('header.home') }}
           </a-menu-item>
           <a-menu-item key="consultation" @click="navigateTo('/consultation')">
             <MessageOutlined />
-            问诊
+            {{ t('header.consultation') }}
           </a-menu-item>
           <a-menu-item key="doctors" @click="navigateTo('/doctors')">
             <TeamOutlined />
-            医生
+            {{ t('header.doctors') }}
           </a-menu-item>
           <a-menu-item key="about" @click="navigateTo('/about')">
             <InfoCircleOutlined />
-            关于
+            {{ t('header.about') }}
           </a-menu-item>
         </a-menu>
+        <a-select
+          v-model:value="currentLocale"
+          style="width: 120px; margin-right: 16px"
+          @change="changeLocale"
+        >
+          <a-select-option value="zh-cn">中文</a-select-option>
+          <a-select-option value="en-us">English</a-select-option>
+        </a-select>
         <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
           <UserOutlined />
           医生登录
@@ -77,12 +85,20 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { HomeOutlined, MessageOutlined, TeamOutlined, InfoCircleOutlined, UserOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
+const { t, locale } = useI18n();
 const selectedKeys = ref<string[]>(['home']);
 const menuVisible = ref(false);
+const currentLocale = ref('zh-cn');
+
+const changeLocale = (value: string) => {
+  locale.value = value;
+  currentLocale.value = value;
+};
 
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {
