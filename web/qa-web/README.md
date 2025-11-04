@@ -4,6 +4,31 @@
 
 QA Live Healthcare 是一个专业的在线医疗问诊平台前端应用，基于 Vue 3 + TypeScript + Vite 构建。该平台连接专业医生与患者，提供便捷、高效的医疗咨询服务，支持实时在线问诊、医生管理、患者咨询等核心功能。
 
+## 应用管理工具
+
+### 脚本功能
+
+- `start`: 启动应用（如果端口 5173 被占用，会自动清理进程后启动）。
+- `stop`: 停止应用。
+- `restart`: 重启应用。
+- `status`: 查看应用运行状态。
+- `logs`: 查看应用日志。
+
+### 使用方法
+
+1. 确保脚本具有可执行权限：
+   ```bash
+   chmod +x app-management.sh
+   ```
+2. 通过 `npm` 运行脚本：
+   ```bash
+   npm run start   # 启动应用
+   npm run stop    # 停止应用
+   npm run restart # 重启应用
+   npm run status  # 查看状态
+   npm run logs    # 查看日志
+   ```
+
 ## 项目文件结构
 
 ```
