@@ -1,1 +1,1 @@
-根据当前git status和git diff状态，阅读所有改动文件内容，使用中文生成详细的git commit message，并统计代码变更量，保持message内容尽量简洁但是不要遗漏任何关键信息，只展示message给我，不要执行commit动作。
+根据当前git status和git diff状态，阅读所有改动文件内容，使用中文生成详细的git commit message（使用纯文本格式输出），并统计代码变更量，保持message内容尽量简洁但是不要遗漏任何关键信息，只展示message给我，不要执行commit动作。

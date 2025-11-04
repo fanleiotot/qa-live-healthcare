@@ -12,6 +12,17 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 
 ## API 端点列表
 
+### DoctorUserController
+
+**文件位置：** [../src/main/java/com/leansofx/qaserviceuser/controller/DoctorUserController.java](../src/main/java/com/leansofx/qaserviceuser/controller/DoctorUserController.java)
+
+医生用户管理控制器，提供医生用户信息的查询功能。
+
+| 方法 | 端点 | 描述 | 参数 | 请求体 | 响应 |
+|--------|----------|-------------|------------|--------------|----------|
+| GET | `/api/doctors` | 获取所有医生用户列表 | 无 | 无 | List<DoctorUserDTO> |
+| GET | `/api/doctors/{id}` | 根据 ID 获取单个医生用户信息 | `id`（路径参数） | 无 | DoctorUserDTO |
+
 ### TestController
 
 **文件位置：** [../src/main/java/com/leansofx/qaserviceuser/controller/TestController.java](../src/main/java/com/leansofx/qaserviceuser/controller/TestController.java)
@@ -25,6 +36,21 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 | OPTIONS | `/api/test/cors` | 处理 CORS 预检请求 | 无 | 无 | 无内容 |
 
 #### 数据结构示例
+
+**DoctorUserDTO（医生用户信息）**
+```json
+{
+  "id": "doc001",
+  "username": "dr-zhang-wei",
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true
+}
+```
 
 **TestResponse（测试响应）**
 ```json
@@ -138,6 +164,63 @@ QA Service User 是医疗问答系统的用户管理服务，基于 Spring Boot 
 ```
 
 ## 使用示例
+
+### 获取所有医生用户
+
+**GET 请求示例：**
+```bash
+curl -X GET http://localhost:8080/api/doctors
+```
+
+**响应示例：**
+```json
+[
+  {
+    "id": "doc001",
+    "username": "dr-zhang-wei",
+    "name": "张伟医生",
+    "title": "主任医师",
+    "department": "心内科",
+    "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "experience": "15年临床经验",
+    "specialties": ["高血压", "冠心病", "心律失常"],
+    "isActive": true
+  },
+  {
+    "id": "doc002",
+    "username": "dr-li-na",
+    "name": "李娜医生",
+    "title": "副主任医师",
+    "department": "儿科",
+    "avatar": "https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "experience": "10年临床经验",
+    "specialties": ["儿童感冒", "儿童发育", "疫苗接种"],
+    "isActive": true
+  }
+]
+```
+
+### 根据 ID 获取医生用户
+
+**GET 请求示例：**
+```bash
+curl -X GET http://localhost:8080/api/doctors/doc001
+```
+
+**响应示例：**
+```json
+{
+  "id": "doc001",
+  "username": "dr-zhang-wei",
+  "name": "张伟医生",
+  "title": "主任医师",
+  "department": "心内科",
+  "avatar": "https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=400",
+  "experience": "15年临床经验",
+  "specialties": ["高血压", "冠心病", "心律失常"],
+  "isActive": true
+}
+```
 
 ### 测试 CORS 配置
 
