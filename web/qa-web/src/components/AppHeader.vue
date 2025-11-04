@@ -5,28 +5,71 @@
         <img src="https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=100" alt="QA Live Healthcare" />
         <span>QA Live Healthcare</span>
       </div>
-      <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu">
-        <a-menu-item key="home" @click="navigateTo('/')">
-          <HomeOutlined />
-          首页
-        </a-menu-item>
-        <a-menu-item key="consultation" @click="navigateTo('/consultation')">
-          <MessageOutlined />
-          问诊
-        </a-menu-item>
-        <a-menu-item key="doctors" @click="navigateTo('/doctors')">
-          <TeamOutlined />
-          医生
-        </a-menu-item>
-        <a-menu-item key="about" @click="navigateTo('/about')">
-          <InfoCircleOutlined />
-          关于
-        </a-menu-item>
-      </a-menu>
-      <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
-        <UserOutlined />
-        医生登录
-      </a-button>
+      <div class="desktop-menu">
+        <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu">
+          <a-menu-item key="home" @click="navigateTo('/')">
+            <HomeOutlined />
+            首页
+          </a-menu-item>
+          <a-menu-item key="consultation" @click="navigateTo('/consultation')">
+            <MessageOutlined />
+            问诊
+          </a-menu-item>
+          <a-menu-item key="doctors" @click="navigateTo('/doctors')">
+            <TeamOutlined />
+            医生
+          </a-menu-item>
+          <a-menu-item key="about" @click="navigateTo('/about')">
+            <InfoCircleOutlined />
+            关于
+          </a-menu-item>
+        </a-menu>
+        <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
+          <UserOutlined />
+          医生登录
+        </a-button>
+      </div>
+      <div class="mobile-menu">
+        <a-button class="hamburger-btn" @click="toggleMenu">
+          <MenuOutlined />
+        </a-button>
+        <a-drawer
+          :visible="menuVisible"
+          placement="right"
+          :closable="false"
+          @close="toggleMenu"
+          :width="300"
+          class="mobile-drawer"
+        >
+          <div class="drawer-header">
+            <a-button type="text" @click="toggleMenu" class="close-btn">
+              <CloseOutlined />
+            </a-button>
+          </div>
+          <a-menu v-model:selectedKeys="selectedKeys" mode="vertical" class="mobile-nav-menu">
+            <a-menu-item key="home" @click="navigateTo('/')">
+              <HomeOutlined />
+              首页
+            </a-menu-item>
+            <a-menu-item key="consultation" @click="navigateTo('/consultation')">
+              <MessageOutlined />
+              问诊
+            </a-menu-item>
+            <a-menu-item key="doctors" @click="navigateTo('/doctors')">
+              <TeamOutlined />
+              医生
+            </a-menu-item>
+            <a-menu-item key="about" @click="navigateTo('/about')">
+              <InfoCircleOutlined />
+              关于
+            </a-menu-item>
+            <a-menu-item key="login" @click="navigateTo('/doctor/login')" class="mobile-login-btn">
+              <UserOutlined />
+              医生登录
+            </a-menu-item>
+          </a-menu>
+        </a-drawer>
+      </div>
     </div>
   </a-layout-header>
 </template>
@@ -34,11 +77,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { HomeOutlined, MessageOutlined, TeamOutlined, InfoCircleOutlined, UserOutlined } from '@ant-design/icons-vue';
+import { HomeOutlined, MessageOutlined, TeamOutlined, InfoCircleOutlined, UserOutlined, MenuOutlined, CloseOutlined } from '@ant-design/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
 const selectedKeys = ref<string[]>(['home']);
+const menuVisible = ref(false);
 
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {
@@ -54,6 +98,11 @@ watch(() => route.path, (newPath) => {
 
 const navigateTo = (path: string) => {
   router.push(path);
+  menuVisible.value = false;
+};
+
+const toggleMenu = () => {
+  menuVisible.value = !menuVisible.value;
 };
 </script>
 
@@ -101,11 +150,17 @@ const navigateTo = (path: string) => {
   color: #1890ff;
 }
 
+.desktop-menu {
+  display: flex;
+  align-items: center;
+}
+
 .nav-menu {
   flex: 1;
   border: none;
   margin: 0 40px;
   line-height: 64px;
+  min-width: 500px;
 }
 
 .login-btn {
@@ -116,5 +171,65 @@ const navigateTo = (path: string) => {
 .login-btn:hover {
   background: #73d13d;
   border-color: #73d13d;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+}
+
+.mobile-drawer {
+  z-index: 1001;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+.close-btn {
+  font-size: 20px;
+}
+
+.mobile-nav-menu {
+  border: none;
+}
+
+.mobile-login-btn {
+  background: #52c41a;
+  border-color: #52c41a;
+  color: #fff;
+  margin-top: 16px;
+}
+
+.mobile-login-btn:hover {
+  background: #73d13d;
+  border-color: #73d13d;
+}
+
+@media (max-width: 992px) {
+  .desktop-menu {
+    display: none;
+  }
+
+  .mobile-menu {
+    display: block;
+  }
+}
+
+@media (min-width: 993px) {
+  .desktop-menu {
+    display: flex;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
 }
 </style>
