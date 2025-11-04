@@ -48,15 +48,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { store, Doctor } from '../store';
+import { getDoctors } from '../api/modules/doctors';
+import type { DoctorUser } from '../api/modules/doctors';
 
 const router = useRouter();
+const allDoctors = ref<DoctorUser[]>([]);
 
-const allDoctors = computed(() => store.state.doctors);
+onMounted(async () => {
+  try {
+    const doctors = await getDoctors();
+    console.log('API Response:', doctors);
+    if (Array.isArray(doctors)) {
+      allDoctors.value = doctors.map(doctor => ({
+        ...doctor,
+        isActive: doctor.active || false,
+      }));
+    } else {
+      console.error('Invalid response format: Expected an array of doctors');
+    }
+  } catch (error) {
+    console.error('Failed to fetch doctors:', error);
+  }
+});
 
-const goToConsultation = (doctor: Doctor) => {
+const goToConsultation = (doctor: DoctorUser) => {
   router.push(`/consultation/${doctor.username}`);
 };
 </script>
