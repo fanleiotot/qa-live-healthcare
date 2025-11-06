@@ -3,32 +3,55 @@
     <div class="header-content">
       <div class="logo" @click="navigateTo('/')">
         <img src="https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=100" alt="QA Live Healthcare" />
-        <span>QA Live Healthcare</span>
+        <span>{{ $t('header.logo') }}</span>
       </div>
       
       <!-- 桌面端菜单 -->
       <a-menu v-model:selectedKeys="selectedKeys" mode="horizontal" class="nav-menu desktop-menu">
         <a-menu-item key="home" @click="navigateTo('/')">
           <HomeOutlined />
-          首页
+          {{ $t('header.home') }}
         </a-menu-item>
         <a-menu-item key="consultation" @click="navigateTo('/consultation')">
           <MessageOutlined />
-          问诊
+          {{ $t('header.consultation') }}
         </a-menu-item>
         <a-menu-item key="doctors" @click="navigateTo('/doctors')">
           <TeamOutlined />
-          医生
+          {{ $t('header.doctors') }}
         </a-menu-item>
         <a-menu-item key="about" @click="navigateTo('/about')">
           <InfoCircleOutlined />
-          关于
+          {{ $t('header.about') }}
         </a-menu-item>
       </a-menu>
-      <a-button type="primary" class="login-btn desktop-login" @click="navigateTo('/doctor/login')">
-        <UserOutlined />
-        医生登录
-      </a-button>
+      
+      <!-- 桌面端右侧区域 -->
+      <div class="header-right desktop-right">
+        <!-- 多语言切换 -->
+        <a-dropdown :trigger="['click']" placement="bottomRight">
+          <a-button type="text" class="language-btn">
+            <GlobalOutlined />
+            {{ $t('header.language') }}
+            <DownOutlined />
+          </a-button>
+          <template #overlay>
+            <a-menu @click="handleLanguageChange">
+              <a-menu-item key="zh-cn" :class="{ active: currentLocale === 'zh-cn' }">
+                {{ $t('languages.zh-cn') }}
+              </a-menu-item>
+              <a-menu-item key="en-us" :class="{ active: currentLocale === 'en-us' }">
+                {{ $t('languages.en-us') }}
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+        
+        <a-button type="primary" class="login-btn" @click="navigateTo('/doctor/login')">
+          <UserOutlined />
+          {{ $t('header.doctorLogin') }}
+        </a-button>
+      </div>
 
       <!-- 移动端汉堡包菜单按钮 -->
       <a-button type="text" class="mobile-menu-btn" @click="toggleMobileMenu">
@@ -40,7 +63,7 @@
     <div v-if="mobileMenuVisible" class="mobile-menu-overlay" @click="closeMobileMenu">
       <div class="mobile-menu-drawer" @click.stop>
         <div class="mobile-menu-header">
-          <span>菜单</span>
+          <span>{{ $t('header.menu') }}</span>
           <a-button type="text" class="close-btn" @click="closeMobileMenu">
             <CloseOutlined />
           </a-button>
@@ -48,23 +71,48 @@
         <div class="mobile-menu-content">
           <div class="mobile-menu-item" @click="navigateToMobile('/')">
             <HomeOutlined />
-            <span>首页</span>
+            <span>{{ $t('header.home') }}</span>
           </div>
           <div class="mobile-menu-item" @click="navigateToMobile('/consultation')">
             <MessageOutlined />
-            <span>问诊</span>
+            <span>{{ $t('header.consultation') }}</span>
           </div>
           <div class="mobile-menu-item" @click="navigateToMobile('/doctors')">
             <TeamOutlined />
-            <span>医生</span>
+            <span>{{ $t('header.doctors') }}</span>
           </div>
           <div class="mobile-menu-item" @click="navigateToMobile('/about')">
             <InfoCircleOutlined />
-            <span>关于</span>
+            <span>{{ $t('header.about') }}</span>
           </div>
+          
+          <!-- 移动端语言切换 -->
+          <div class="mobile-language-section">
+            <div class="mobile-language-title">
+              <GlobalOutlined />
+              {{ $t('header.language') }}
+            </div>
+            <div class="mobile-language-options">
+              <div 
+                class="mobile-language-item" 
+                :class="{ active: currentLocale === 'zh-cn' }"
+                @click="handleLanguageChange({ key: 'zh-cn' })"
+              >
+                {{ $t('languages.zh-cn') }}
+              </div>
+              <div 
+                class="mobile-language-item" 
+                :class="{ active: currentLocale === 'en-us' }"
+                @click="handleLanguageChange({ key: 'en-us' })"
+              >
+                {{ $t('languages.en-us') }}
+              </div>
+            </div>
+          </div>
+          
           <a-button type="primary" class="mobile-login-btn" @click="navigateToMobile('/doctor/login')">
             <UserOutlined />
-            医生登录
+            {{ $t('header.doctorLogin') }}
           </a-button>
         </div>
       </div>
@@ -73,8 +121,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { switchLanguage } from '../i18n';
 import { 
   HomeOutlined, 
   MessageOutlined, 
@@ -82,13 +132,18 @@ import {
   InfoCircleOutlined, 
   UserOutlined,
   MenuOutlined,
-  CloseOutlined
+  CloseOutlined,
+  GlobalOutlined,
+  DownOutlined
 } from '@ant-design/icons-vue';
 
 const router = useRouter();
 const route = useRoute();
+const { locale } = useI18n();
 const selectedKeys = ref<string[]>(['home']);
 const mobileMenuVisible = ref(false);
+
+const currentLocale = computed(() => locale.value);
 
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {
@@ -117,6 +172,11 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   mobileMenuVisible.value = false;
+};
+
+const handleLanguageChange = ({ key }: { key: string }) => {
+  switchLanguage(key);
+  closeMobileMenu();
 };
 </script>
 
@@ -169,6 +229,39 @@ const closeMobileMenu = () => {
   border: none;
   margin: 0 40px;
   line-height: 64px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.language-btn {
+  color: #666;
+  font-size: 14px;
+  padding: 4px 12px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.language-btn:hover {
+  background-color: #f5f5f5;
+  color: #1890ff;
+}
+
+.language-btn .anticon {
+  font-size: 16px;
+}
+
+/* 语言下拉菜单样式 */
+:deep(.ant-dropdown-menu) {
+  .ant-dropdown-menu-item.active {
+    background-color: #e6f7ff;
+    color: #1890ff;
+    font-weight: 500;
+  }
 }
 
 .login-btn {
@@ -257,6 +350,52 @@ const closeMobileMenu = () => {
   color: #1890ff;
 }
 
+.mobile-language-section {
+  padding: 16px 20px;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin: 16px 0;
+}
+
+.mobile-language-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.mobile-language-title .anticon {
+  font-size: 18px;
+  color: #1890ff;
+}
+
+.mobile-language-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-language-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.mobile-language-item:hover {
+  background-color: #f5f5f5;
+}
+
+.mobile-language-item.active {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  font-weight: 500;
+}
+
 .mobile-login-btn {
   margin: 20px 20px 0;
   width: calc(100% - 40px);
@@ -275,7 +414,7 @@ const closeMobileMenu = () => {
 @media (max-width: 1024px) {
   /* iPad及以下设备 */
   .desktop-menu,
-  .desktop-login {
+  .desktop-right {
     display: none !important;
   }
   
