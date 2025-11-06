@@ -1,0 +1,7 @@
+---
+mode: 'agent'
+description: 'just add all changed files to and create a commit'
+---
+run 'git add -A' to stage all changes in the repository.
+Then, use the commit message generated from the previous prompt to create a new git commit that accurately reflects the modifications made in the codebase.
+Then show a summary of the commit created, including the commit hash and message, and code change statistics (e.g., number of files changed, insertions, deletions).
