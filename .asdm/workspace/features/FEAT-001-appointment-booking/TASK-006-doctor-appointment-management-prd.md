@@ -4,7 +4,7 @@
 **Feature Name**: appointment-booking
 **Task ID**: TASK-006
 **Created Date**: 2026-04-22
-**Status**: TODO
+**Status**: DONE
 **Language**: zh
 
 ## 1. Task Overview
