@@ -125,16 +125,212 @@
   - 状态层：`src/store/index.ts` 新增 `Appointment`/`AppointmentSlot` 接口和相关 Store 方法
   - 路由层：新增 `/appointment` 路由
   - 视图层：新增 `Appointment.vue` 页面组件
+- **架构影响分析**：
+  - 现有 ER 关系从 `Doctor → Question ← Patient` 扩展为三组关系：`Doctor → Question ← Patient`（保持不变）、`Doctor → AppointmentSlot`（排班）、`Doctor → Appointment ← Patient`（预约）
+  - State 结构从 5 个字段扩展为 7 个字段（新增 `appointments`、`appointmentSlots`），现有字段不受影响
+  - 数据流新增路径：`appointment-slots.json` → State → Appointment.vue / DoctorRoom.vue / Consultation.vue
+  - 路由表从 7 条扩展为 8 条（新增 `/appointment`），不修改现有路由配置
 
-### 5.2 Dependencies
+### 5.2 Data Model Design
+
+- **新增实体 Appointment（预约记录）**：
+
+```typescript
+interface Appointment {
+  id: string;              // 唯一标识，格式 "apt001"
+  patientId: string;       // 患者ID（FK → Patient.id）
+  patientName: string;     // 患者姓名（冗余字段，与 Question 保持一致）
+  doctorId: string;        // 医生ID（FK → Doctor.id）
+  doctorName: string;      // 医生姓名（冗余字段）
+  date: string;            // 预约日期，格式 "YYYY-MM-DD"
+  timeSlot: string;        // 预约时段，格式 "HH:mm-HH:mm"，如 "08:00-08:30"
+  status: 'pending' | 'confirmed' | 'cancelled';  // 预约状态
+  cancelReason: string;    // 取消原因（仅 cancelled 状态有值）
+  createdAt: string;       // 创建时间（ISO 8601）
+  updatedAt: string;       // 更新时间（ISO 8601）
+}
+```
+
+- **新增实体 AppointmentSlot（排班时段）**：
+
+```typescript
+interface AppointmentSlot {
+  id: string;              // 唯一标识，格式 "slot_doc001_2026-04-23_08:00"
+  doctorId: string;        // 医生ID（FK → Doctor.id）
+  date: string;            // 排班日期，格式 "YYYY-MM-DD"
+  timeSlot: string;        // 时段，格式 "HH:mm-HH:mm"
+  period: 'morning' | 'afternoon';  // 上午/下午
+  status: 'available' | 'booked' | 'cancelled';  // 时段状态
+}
+```
+
+- **预约状态机**：
+
+```
+[创建预约] → pending → confirmed  （医生确认）
+                  ↘ cancelled  （医生取消，需填原因 / 患者取消）
+```
+
+- **排班时段状态机**：
+
+```
+available → booked     （有预约关联该时段）
+booked    → available  （关联的预约被取消，释放时段）
+```
+
+- **ER 关系**：
+
+```
+DOCTOR 1──N APPOINTMENT_SLOT  （一个医生多个排班时段）
+DOCTOR 1──N APPOINTMENT       （一个医生多个预约）
+PATIENT 1──N APPOINTMENT       （一个患者多个预约）
+APPOINTMENT_SLOT 1──0..1 APPOINTMENT  （一个时段最多关联一个预约）
+```
+
+### 5.3 Store API Design
+
+- **State 新增字段**：
+
+```typescript
+interface State {
+  // ... 现有字段保持不变 ...
+  appointments: Appointment[];         // 全部预约列表
+  appointmentSlots: AppointmentSlot[]; // 全部排班时段
+}
+```
+
+- **新增 Store 方法**：
+
+| 方法名 | 签名 | 说明 | 返回值 |
+|--------|------|------|--------|
+| `getSlotsByDoctor` | `(doctorId: string): AppointmentSlot[]` | 查询医生的全部排班时段 | 时段数组 |
+| `getSlotsByDoctorAndDate` | `(doctorId: string, date: string): AppointmentSlot[]` | 查询医生某天的排班 | 时段数组 |
+| `getAvailableSlotsByDoctorAndDate` | `(doctorId: string, date: string): AppointmentSlot[]` | 查询可预约时段（status=available） | 时段数组 |
+| `createAppointment` | `(data: Omit<Appointment, 'id' \| 'status' \| 'cancelReason' \| 'createdAt' \| 'updatedAt'>): Appointment` | 创建预约，联动更新排班状态为 booked | 新 Appointment |
+| `confirmAppointment` | `(appointmentId: string): void` | 确认预约 | void |
+| `cancelAppointment` | `(appointmentId: string, reason: string): void` | 取消预约，联动释放排班状态为 available | void |
+| `getAppointmentsByDoctor` | `(doctorId: string): Appointment[]` | 查询医生的预约列表 | 预约数组 |
+| `getAppointmentsByPatient` | `(patientId: string): Appointment[]` | 查询患者的预约列表 | 预约数组 |
+
+- **排班联动逻辑**：
+  - `createAppointment`：创建预约后，查找对应 `appointmentSlots` 中 `doctorId + date + timeSlot` 匹配的记录，将其 `status` 改为 `booked`
+  - `cancelAppointment`：取消预约后，查找对应排班记录，将其 `status` 恢复为 `available`
+
+### 5.4 Frontend Component Design
+
+- **新增组件**：
+
+| 组件 | 路径 | 说明 |
+|------|------|------|
+| `Appointment.vue` | `src/views/Appointment.vue` | 预约挂号页面（患者端），包含医生列表、排班展示、预约提交 |
+
+- **修改组件**：
+
+| 组件 | 路径 | 修改内容 |
+|------|------|----------|
+| `DoctorRoom.vue` | `src/views/DoctorRoom.vue` | 用 `a-tabs` 包裹现有内容，新增"预约管理"标签页 |
+| `Consultation.vue` | `src/views/Consultation.vue` | 在"我的问题"下方新增"我的预约"区域 |
+| `AppHeader.vue` | `src/components/AppHeader.vue` | 导航菜单新增"预约挂号"项 |
+
+- **Appointment.vue 页面布局结构**：
+
+```
+┌─────────────────────────────────────┐
+│  a-alert: 会话数据提示               │
+├─────────────────────────────────────┤
+│  患者验证区域（未验证时显示）         │
+│  ┌─────────┐  ┌─────────┐           │
+│  │ 姓名输入 │  │ 生日选择 │ [验证]    │
+│  └─────────┘  └─────────┘           │
+├─────────────────────────────────────┤
+│  [医生列表] / [排班详情]（二选一）    │
+│                                     │
+│  医生列表视图：                       │
+│  ┌──────┐ ┌──────┐ ┌──────┐         │
+│  │ Doc1 │ │ Doc2 │ │ Doc3 │  ...    │
+│  └──────┘ └──────┘ └──────┘         │
+│                                     │
+│  排班详情视图（选择医生后）：          │
+│  [← 返回列表]  医生信息              │
+│  ┌─────────────────────────────┐    │
+│  │ 日期标签: [4/23] [4/24] ... │    │
+│  ├─────────────────────────────┤    │
+│  │ 上午                        │    │
+│  │ [08:00] [08:30] ... [已满]  │    │
+│  │ 下午                        │    │
+│  │ [14:00] [14:30] ...        │    │
+│  ├─────────────────────────────┤    │
+│  │ [预约挂号] 按钮             │    │
+│  └─────────────────────────────┘    │
+└─────────────────────────────────────┘
+  a-modal: 预约确认弹窗
+```
+
+- **DoctorRoom.vue 预约管理标签页布局**：
+
+```
+┌─ a-tabs ────────────────────────────┐
+│ [问诊管理]  [预约管理]               │
+├─────────────────────────────────────┤
+│  问诊管理（现有内容，移入第一个tab）   │
+│  ┌─ 待响应问题 ─┬─ 已解答问题 ─┐    │
+│  ...现有内容不变...                │
+└─────────────────────────────────────┘
+│  预约管理（新增第二个tab）           │
+│  按日期分组：                       │
+│  ▼ 2026-04-23                     │
+│    ┌───────────────────────────┐   │
+│    │ 赵明 08:00-08:30 [待确认]  │   │
+│    │   [确认] [取消]           │   │
+│    │ 李芳 09:00-09:30 [已确认]  │   │
+│    │   [取消]                  │   │
+│    └───────────────────────────┘   │
+└─────────────────────────────────────┘
+```
+
+- **Consultation.vue 我的预约区域布局**：
+
+```
+┌─ 我的预约 ──────────────────────────┐
+│  ┌─────────────────────────────┐    │
+│  │ 张伟医生  4/23  08:00-08:30  │    │
+│  │ 状态：[待确认]              │    │
+│  │              [取消预约]      │    │
+│  ├─────────────────────────────┤    │
+│  │ 李娜医生  4/25  14:00-14:30 │    │
+│  │ 状态：[已确认]              │    │
+│  └─────────────────────────────┘    │
+└─────────────────────────────────────┘
+```
+
+- **组件间数据流向**：
+
+```
+appointment-slots.json → store.state.appointmentSlots
+appointment-list.json  → store.state.appointments
+                              │
+              ┌───────────────┼───────────────┐
+              ▼               ▼               ▼
+      Appointment.vue   DoctorRoom.vue   Consultation.vue
+      (患者浏览排班)    (医生管理预约)   (患者查看预约)
+              │               │               │
+              └───────┬───────┘               │
+                      ▼                       │
+              store.createAppointment()        │
+              store.cancelAppointment()        │
+                      ▲                       │
+                      └───────────────────────┘
+```
+
+### 5.5 Dependencies
 
 - **内部依赖**：
   - 复用现有 `Doctor`/`Patient` 数据模型和 Store 方法（`verifyPatient`、`loginDoctor`）
   - 复用 `AppHeader.vue` 导航菜单组件
-  - 复用 Ant Design Vue 组件库（`a-card`、`a-modal`、`a-tag`、`a-calendar`、`a-button` 等）
+  - 复用 Ant Design Vue 组件库（`a-card`、`a-modal`、`a-tag`、`a-button`、`a-tabs`、`a-divider`、`a-empty` 等）
   - 复用 `dayjs` 进行日期处理
 
-### 5.3 Constraints
+### 5.6 Constraints
 
 - 不引入新的 NPM 依赖
 - 使用 Ant Design Vue 现有组件实现日期/时间选择（不使用第三方日期选择器）
@@ -180,6 +376,12 @@
 - **预约状态流转**：`pending`（待确认）→ `confirmed`（已确认）/ `cancelled`（已取消）
 - **ID 生成策略**：与现有一致，使用 `apt${Date.now()}` 生成预约 ID
 - **与现有问诊功能的关系**：预约挂号是独立功能模块，不影响现有问诊流程
+- **并发冲突说明**：本项目为纯前端单用户场景，不存在多患者同时竞争同一时段的并发问题。排班状态在 Store 中即时更新，选中时段后的可用性以提交时的实际状态为准
+- **已有功能影响分析**：
+  - `src/store/index.ts`：仅新增接口和方法，不修改现有代码，对问诊功能零影响
+  - `src/views/Consultation.vue`：在"我的问题"下方追加"我的预约"区域，不改动现有问诊逻辑
+  - `src/views/DoctorRoom.vue`：使用 `a-tabs` 包裹现有内容 + 新增标签页，不改动现有问题回复逻辑
+  - `src/components/AppHeader.vue`：在导航菜单追加一个菜单项，不影响现有菜单项
 
 ## 9. Risks and Mitigations
 
